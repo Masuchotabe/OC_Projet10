@@ -1,0 +1,46 @@
+from datetime import datetime
+
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from django.utils.translation import gettext as _
+
+from utils import calculate_age
+
+UserModel = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    password2 = serializers.
+    class Meta:
+        model = UserModel
+        fields = ['id', 'username', 'password', 'birth_date', 'can_be_contacted', 'can_data_be_shared']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        user = UserModel.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            birth_date=validated_data['birth_date'],
+            can_be_contacted=validated_data['can_be_contacted'],
+            can_data_be_shared=validated_data['can_data_be_shared'],
+        )
+        return user
+
+    def update(self, instance, validated_data={}):
+        instance = super().update(instance, validated_data)
+        password = validated_data.get('password', None)
+        if password:
+            instance.set_password(password)
+            instance.save()
+        return instance
+
+    def validate_birth_date(self, value):
+        if calculate_age(value) < 15:
+            raise serializers.ValidationError(_("User must be at least 15 years old to proceed."))
+        return value
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Password fields didn't match."})
