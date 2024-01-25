@@ -4,9 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 djangorestframework = "*"
 djangorestframework-simplejwt = "*"
+django = "==5.0.1"
 
 [dev-packages]
 
