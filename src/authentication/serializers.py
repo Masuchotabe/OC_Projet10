@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
@@ -10,7 +11,9 @@ UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password2 = serializers.
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = UserModel
         fields = ['id', 'username', 'password', 'birth_date', 'can_be_contacted', 'can_data_be_shared']
