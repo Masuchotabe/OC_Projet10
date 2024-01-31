@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ['id', 'username', 'password', 'birth_date', 'can_be_contacted', 'can_data_be_shared']
+        fields = ['id', 'username', 'password', 'password2', 'birth_date', 'can_be_contacted', 'can_data_be_shared']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -47,3 +47,4 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
+        return attrs
