@@ -10,7 +10,7 @@ from authentication.models import User
 from authentication.serializers import UserSerializer
 from authentication.permissions import UserPermission
 from projects.models import Project, Issue, Comment
-from projects.serializers import ProjectSerializer
+from projects.serializers import ProjectSerializer, IssueSerializer, CommentSerializer
 
 
 # Create your views here.
