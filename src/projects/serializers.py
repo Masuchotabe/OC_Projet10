@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.utils.translation import gettext as _
 
-from projects.models import Project, Issue, Comment
+from projects.models import Project, Issue, Comment, Contributor
 
 UserModel = get_user_model()
 
@@ -29,20 +29,28 @@ class ProjectSerializer(serializers.ModelSerializer):
         project.add_contributor(user)
         return project
 
-    # def update(self, instance, validated_data={}):
-    #     pass
-
-    # def validate_birth_date(self, value):
-    #     pass
-
-    # def validate(self, attrs):
-    #     pass
-
 
 class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
         fields = '__all__'
+        extra_kwargs = {
+            'author': {'read_only': True},
+        }
+
+    def validate(self, data):
+        project = data.get('project')
+        contributor = data.get('contributor')
+
+        if contributor and not project.contributors.filter(id=contributor.id).exists():
+            raise serializers.ValidationError(_('This contributor is not contributing to this project.'))
+
+        return data
+
+    def create(self, validated_data):
+        if validated_data.get('contributor') is None:
+            validated_data['contributor'] = Contributor.objects.get_or_create(user=validated_data['author'])[0]
+        return super().create(validated_data)
 
 
 class CommentSerializer(serializers.ModelSerializer):

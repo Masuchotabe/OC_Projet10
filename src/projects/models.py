@@ -39,12 +39,12 @@ class Project(models.Model):
 
 
 class Issue(models.Model):
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
     name = models.CharField(max_length=128)
     description = models.TextField(blank=True)
     priority = models.CharField(max_length=10, choices=PriorityChoices.choices)
     tag = models.CharField(max_length=10, choices=IssueTagChoices.choices)
-    contributor = models.ForeignKey(to="Contributor", on_delete=models.CASCADE)
+    contributor = models.ForeignKey(to="Contributor", on_delete=models.CASCADE, blank=True)
     author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_time = models.DateTimeField(auto_now_add=True)
 

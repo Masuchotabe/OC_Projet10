@@ -10,6 +10,7 @@ from authentication.models import User
 from authentication.serializers import UserSerializer
 from authentication.permissions import UserPermission
 from projects.models import Project, Issue, Comment
+from projects.permissions import IsProjectContributor
 from projects.serializers import ProjectSerializer, IssueSerializer, CommentSerializer
 
 
@@ -49,8 +50,13 @@ class ProjectViewSet(ModelViewSet):
 class IssueViewSet(ModelViewSet):
     serializer_class = IssueSerializer
     queryset = Issue.objects.all()
+    permission_classes = [IsAuthenticated, IsProjectContributor]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
+    permission_classes = [IsAuthenticated, IsProjectContributor]
