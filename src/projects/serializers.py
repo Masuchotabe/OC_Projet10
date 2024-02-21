@@ -2,21 +2,48 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.utils.translation import gettext as _
+from rest_framework.relations import HyperlinkedRelatedField
 
 from projects.models import Project, Issue, Comment, Contributor
 
 UserModel = get_user_model()
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class ContributorSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()  # Ou serializers.PrimaryKeyRelatedField() selon vos besoins
+
+    class Meta:
+        model = Contributor
+        fields = ['user']
+
+
+class ProjectListSerializer(serializers.ModelSerializer):
+    contributors = ContributorSerializer(many=True, read_only=True)
+    author = serializers.StringRelatedField()
+    issues = HyperlinkedRelatedField(view_name='issue-detail', many=True, read_only=True)
 
     class Meta:
         model = Project
-        fields = "__all__"
+        fields = ["id", "name", "description", "author", "contributors", "type"]
         extra_kwargs = {
             'contributors': {'read_only': True},
             'author': {'read_only': True},
         }
+        depth = 1
+
+class ProjectSerializer(serializers.ModelSerializer):
+    contributors = ContributorSerializer(many=True, read_only=True)
+    author = serializers.StringRelatedField()
+    issues = HyperlinkedRelatedField(view_name='issue-detail', many=True, read_only=True)
+
+    class Meta:
+        model = Project
+        fields = ["id", "name", "description", "author", "contributors", "type", "issues"]
+        extra_kwargs = {
+            'contributors': {'read_only': True},
+            'author': {'read_only': True},
+        }
+        depth = 1
 
     def validate_name(self, value):
         if Project.objects.filter(name=value).exists():
@@ -37,6 +64,7 @@ class IssueSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'author': {'read_only': True},
         }
+
 
     def validate(self, data):
         project = data.get('project')

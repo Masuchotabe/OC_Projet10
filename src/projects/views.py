@@ -21,13 +21,20 @@ class ProjectViewSet(ModelViewSet):
     serializer_class = ProjectSerializer
     # queryset = Project.objects.all()
     permission_classes = [IsAuthenticated]
+    filterset_fields = ('type', 'name')
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Project.objects.all()
+            projects = Project.objects.all()
         else:
             user = self.request.user
-            return Project.objects.filter(Q(author=user) | Q(contributors__user=user))
+            projects = Project.objects.filter(Q(author=user) | Q(contributors__user=user))
+        return projects.prefetch_related('contributors__user', 'author', 'issues')
+
+    # def get_serializer_class(self):
+    #     if self.action == 'list':
+    #         return ProjectListSerializer
+    #     return ProjectSerializer
 
     def perform_create(self, serializer):
 
@@ -51,6 +58,7 @@ class IssueViewSet(ModelViewSet):
     serializer_class = IssueSerializer
     queryset = Issue.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
+    filterset_fields = ('tag', 'name', 'priority', 'project')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -60,3 +68,6 @@ class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
