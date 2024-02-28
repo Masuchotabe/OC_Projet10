@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from django.utils.translation import gettext as _
-from rest_framework.relations import HyperlinkedRelatedField
+from rest_framework.relations import HyperlinkedRelatedField, HyperlinkedIdentityField
 
 from projects.models import Project, Issue, Comment, Contributor
 
@@ -10,7 +10,7 @@ UserModel = get_user_model()
 
 
 class ContributorSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()  # Ou serializers.PrimaryKeyRelatedField() selon vos besoins
+    user = serializers.StringRelatedField()
 
     class Meta:
         model = Contributor
@@ -18,20 +18,14 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
-    contributors = ContributorSerializer(many=True, read_only=True)
-    author = serializers.StringRelatedField()
-    issues = HyperlinkedRelatedField(view_name='issue-detail', many=True, read_only=True)
 
     class Meta:
         model = Project
-        fields = ["id", "name", "description", "author", "contributors", "type"]
-        extra_kwargs = {
-            'contributors': {'read_only': True},
-            'author': {'read_only': True},
-        }
+        fields = ["id", "name", "description", "type"]
         depth = 1
 
-class ProjectSerializer(serializers.ModelSerializer):
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
     contributors = ContributorSerializer(many=True, read_only=True)
     author = serializers.StringRelatedField()
     issues = HyperlinkedRelatedField(view_name='issue-detail', many=True, read_only=True)
@@ -57,14 +51,23 @@ class ProjectSerializer(serializers.ModelSerializer):
         return project
 
 
-class IssueSerializer(serializers.ModelSerializer):
+class IssueListSerializer(serializers.ModelSerializer):
+    url = HyperlinkedIdentityField(view_name='issue-detail')
+
+    class Meta:
+        model = Issue
+        fields = ['name', 'project', 'priority', 'tag', 'url']
+
+
+class IssueDetailSerializer(serializers.ModelSerializer):
+    comments = HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+
     class Meta:
         model = Issue
         fields = '__all__'
         extra_kwargs = {
             'author': {'read_only': True},
         }
-
 
     def validate(self, data):
         project = data.get('project')
@@ -85,3 +88,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+        extra_kwargs = {
+            'author': {'read_only': True},
+        }

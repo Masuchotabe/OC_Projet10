@@ -27,7 +27,7 @@ router.register('user', UserViewSet, basename='user')
 
 router.register('project', ProjectViewSet, basename='project')
 router.register('issue', IssueViewSet, basename='issue')
-router.register('project', CommentViewSet, basename='comment')
+router.register('comment', CommentViewSet, basename='comment')
 
 
 urlpatterns = [

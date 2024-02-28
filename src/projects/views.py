@@ -11,15 +11,12 @@ from authentication.serializers import UserSerializer
 from authentication.permissions import UserPermission
 from projects.models import Project, Issue, Comment
 from projects.permissions import IsProjectContributor
-from projects.serializers import ProjectSerializer, IssueSerializer, CommentSerializer
-
-
-# Create your views here.
+from projects.serializers import ProjectListSerializer, ProjectDetailSerializer, IssueListSerializer, \
+    IssueDetailSerializer, CommentSerializer
 
 
 class ProjectViewSet(ModelViewSet):
-    serializer_class = ProjectSerializer
-    # queryset = Project.objects.all()
+
     permission_classes = [IsAuthenticated]
     filterset_fields = ('type', 'name')
 
@@ -31,10 +28,10 @@ class ProjectViewSet(ModelViewSet):
             projects = Project.objects.filter(Q(author=user) | Q(contributors__user=user))
         return projects.prefetch_related('contributors__user', 'author', 'issues')
 
-    # def get_serializer_class(self):
-    #     if self.action == 'list':
-    #         return ProjectListSerializer
-    #     return ProjectSerializer
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProjectListSerializer
+        return ProjectDetailSerializer
 
     def perform_create(self, serializer):
 
@@ -55,13 +52,18 @@ class ProjectViewSet(ModelViewSet):
 
 
 class IssueViewSet(ModelViewSet):
-    serializer_class = IssueSerializer
+    # serializer_class = IssueSerializer
     queryset = Issue.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
     filterset_fields = ('tag', 'name', 'priority', 'project')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return IssueListSerializer
+        return IssueDetailSerializer
 
 
 class CommentViewSet(ModelViewSet):
