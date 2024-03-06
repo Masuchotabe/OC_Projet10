@@ -6,7 +6,10 @@ from projects.serializers import IssueDetailSerializer, CommentSerializer
 
 
 class IsProjectContributor(permissions.BasePermission):
-
+    """
+    Permet de définir si un utilisateur est contributeur du projet pour la notion d'issue ou de commentaire.
+    Seul un contributeur du projet peut créer une issue ou un commentaire
+    """
     def has_permission(self, request, view):
         project_id = None
         if view.action == 'list':

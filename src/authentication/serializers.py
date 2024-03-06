@@ -22,6 +22,9 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        """
+        Création du user dans la base ( permet de gérer le hash du mot de passe via django)
+        """
         user = UserModel.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
@@ -32,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data={}):
+        """Gestion de la mise à jour du password utilisateur"""
         instance = super().update(instance, validated_data)
         password = validated_data.get('password', None)
         if password:
@@ -40,11 +44,13 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
     def validate_birth_date(self, value):
+        """Validation de la date de naissance, l'utilisateur doit avoir plus de 15 ans pour s'inscrire."""
         if calculate_age(value) < 15:
             raise serializers.ValidationError(_("User must be at least 15 years old to proceed."))
         return value
 
     def validate(self, attrs):
+        """Validation du password."""
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs

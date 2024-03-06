@@ -3,8 +3,6 @@ import uuid
 from django.conf import settings
 from django.db import models
 
-# Create your models here.
-
 
 class TypeChoices(models.TextChoices):
     BACKEND = "Back-end"
@@ -34,6 +32,7 @@ class Project(models.Model):
     contributors = models.ManyToManyField(to="Contributor")
 
     def add_contributor(self, user):
+        """Permet de créer si besoin puis d'ajouter un contributeur au projet"""
         contributor, created = Contributor.objects.get_or_create(user=user)
         self.contributors.add(contributor)
 

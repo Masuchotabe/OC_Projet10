@@ -2,6 +2,11 @@ from rest_framework import permissions
 
 
 class UserPermission(permissions.BasePermission):
+    """ Permission liée à la lecture ou modification d'un USER.
+    Seul un admin ou l'utilisateur lui meme peut modifier, lire ou supprimer l'objet
+    La création ne nécessite pas de connexion.
+    Seuls les admins peuvent lister les utilisateurs.
+    """
 
     def has_permission(self, request, view):
         if view.action == 'create':

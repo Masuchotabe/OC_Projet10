@@ -40,6 +40,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         depth = 1
 
     def validate_name(self, value):
+        """Interdiction d'avoir 2 project avec le même nom."""
         if Project.objects.filter(name=value).exists():
             raise serializers.ValidationError(_('Project with this name already exist'))
         return value
@@ -70,6 +71,7 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
+        """Validation du contributeur attribué à l'issue. Il doit être contributeur du projet."""
         project = data.get('project')
         contributor = data.get('contributor')
 
@@ -79,6 +81,10 @@ class IssueDetailSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """
+        Création de l'issue. S'il n'y a pas de contributeur associé,
+        on associe automatiquement l'auteur comme contributeur.
+        """
         if validated_data.get('contributor') is None:
             validated_data['contributor'] = Contributor.objects.get_or_create(user=validated_data['author'])[0]
         return super().create(validated_data)

@@ -21,6 +21,9 @@ class ProjectViewSet(ModelViewSet):
     filterset_fields = ('type', 'name')
 
     def get_queryset(self):
+        """
+        Filtre les projets en fonction
+        """
         if self.request.user.is_staff:
             projects = Project.objects.all()
         else:
@@ -29,16 +32,18 @@ class ProjectViewSet(ModelViewSet):
         return projects.prefetch_related('contributors__user', 'author', 'issues')
 
     def get_serializer_class(self):
+        """Retourne le serializer en fonction de l'action"""
         if self.action == 'list':
             return ProjectListSerializer
         return ProjectDetailSerializer
 
     def perform_create(self, serializer):
-
+        """Permet d'ajouter le user connecté comme auteur lors de la création"""
         serializer.save(author=self.request.user)
 
     @action(methods=['post'], detail=True)
     def add_contributor(self, request, pk=None):
+        """Route permettant l'ajout d'un contributeur sur un projet"""
         project = self.get_object()
         username = request.data.get('username')
 
@@ -52,15 +57,16 @@ class ProjectViewSet(ModelViewSet):
 
 
 class IssueViewSet(ModelViewSet):
-    # serializer_class = IssueSerializer
     queryset = Issue.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
     filterset_fields = ('tag', 'name', 'priority', 'project')
 
     def perform_create(self, serializer):
+        """Permet d'ajouter le user connecté comme auteur lors de la création"""
         serializer.save(author=self.request.user)
 
     def get_serializer_class(self):
+        """Retourne le serializer en fonction de l'action"""
         if self.action == 'list':
             return IssueListSerializer
         return IssueDetailSerializer
@@ -72,4 +78,5 @@ class CommentViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated, IsProjectContributor]
 
     def perform_create(self, serializer):
+        """Permet d'ajouter le user connecté comme auteur lors de la création"""
         serializer.save(author=self.request.user)
