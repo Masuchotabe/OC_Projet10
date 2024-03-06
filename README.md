@@ -7,7 +7,7 @@ Openclassrooms - Projet 10 : Créez une API sécurisée RESTful en utilisant Dja
 Si pipenv n'est pas installé sur votre post : 
 `pip install pipenv`
 
-Naviguez vers le dossier OC_Projet10 et installez le avec : 
+Une fois pipenv installé, naviguez vers le dossier OC_Projet10 et installez le projet :
 `pipenv install`
 
 Lancez le projet avec la commande : 
