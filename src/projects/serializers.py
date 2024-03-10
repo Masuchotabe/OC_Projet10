@@ -80,7 +80,7 @@ class ContributorField(serializers.Field):
 
 class IssueDetailSerializer(serializers.ModelSerializer):
     comments = HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
-    contributor = ContributorField()
+    contributor = ContributorField(required=False)
     author = serializers.StringRelatedField()
 
     class Meta:
