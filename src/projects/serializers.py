@@ -60,8 +60,27 @@ class IssueListSerializer(serializers.ModelSerializer):
         fields = ['name', 'project', 'priority', 'tag', 'url']
 
 
+class ContributorField(serializers.Field):
+    def to_representation(self, obj):
+        if obj:
+            return obj.user.username
+
+    def to_internal_value(self, data):
+        if isinstance(data, str):
+            if UserModel.objects.filter(username=data).exists():
+                return Contributor.objects.get_or_create(user=UserModel.objects.get(username=data))[0]
+            else:
+                raise serializers.ValidationError(_('Contributor does not exist with this username'))
+        elif isinstance(data, int):
+            if Contributor.objects.filter(id=data).exists():
+                return Contributor.objects.get(id=data)
+            else:
+                raise serializers.ValidationError(_('Contributor does not exist'))
+
+
 class IssueDetailSerializer(serializers.ModelSerializer):
     comments = HyperlinkedRelatedField(many=True, read_only=True, view_name='comment-detail')
+    contributor = ContributorField()
 
     class Meta:
         model = Issue
