@@ -28,7 +28,7 @@ class ProjectViewSet(ModelViewSet):
             projects = Project.objects.all()
         else:
             user = self.request.user
-            projects = Project.objects.filter(Q(author=user) | Q(contributors__user=user))
+            projects = Project.objects.filter(Q(author=user) | Q(contributors__user=user)).distinct()
         return projects.prefetch_related('contributors__user', 'author', 'issues')
 
     def get_serializer_class(self):

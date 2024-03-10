@@ -14,7 +14,7 @@ class ContributorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Contributor
-        fields = ['user']
+        fields = ['user', 'id']
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
@@ -65,10 +65,14 @@ class IssueDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = '__all__'
+        fields = ['name', 'project', 'description', 'tag', 'priority', 'comments', 'contributor']
         extra_kwargs = {
             'author': {'read_only': True},
+            'comments': {'read_only': True},
         }
+
+    def is_valid(self, raise_exception=False):
+        return super().is_valid(raise_exception=raise_exception)
 
     def validate(self, data):
         """Validation du contributeur attribué à l'issue. Il doit être contributeur du projet."""
