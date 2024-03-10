@@ -57,7 +57,6 @@ class ProjectViewSet(ModelViewSet):
 
 
 class IssueViewSet(ModelViewSet):
-    queryset = Issue.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
     filterset_fields = ('tag', 'name', 'priority', 'project')
 
@@ -71,12 +70,27 @@ class IssueViewSet(ModelViewSet):
             return IssueListSerializer
         return IssueDetailSerializer
 
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            issues = Issue.objects.all()
+        else:
+            user = self.request.user
+            issues = Issue.objects.filter(project__contributors__user=user)
+        return issues
+
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    queryset = Comment.objects.all()
     permission_classes = [IsAuthenticated, IsProjectContributor]
 
     def perform_create(self, serializer):
         """Permet d'ajouter le user connecté comme auteur lors de la création"""
         serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        if self.request.user.is_staff:
+            comments = Comment.objects.all()
+        else:
+            user = self.request.user
+            comments = Comment.objects.filter(issue__project__contributors__user=user)
+        return comments
