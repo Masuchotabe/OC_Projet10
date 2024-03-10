@@ -57,7 +57,7 @@ class IssueListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = ['name', 'project', 'priority', 'tag', 'url']
+        fields = ['id', 'name', 'project', 'priority', 'tag', 'url']
 
 
 class ContributorField(serializers.Field):
@@ -84,7 +84,7 @@ class IssueDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = ['name', 'project', 'description', 'tag', 'priority', 'comments', 'contributor']
+        fields = ['id', 'name', 'project', 'description', 'tag', 'priority', 'comments', 'contributor']
         extra_kwargs = {
             'author': {'read_only': True},
             'comments': {'read_only': True},
