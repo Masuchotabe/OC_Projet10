@@ -35,6 +35,8 @@ class CanEditObject(permissions.BasePermission):
             return False
         if view.action in ['update', 'partial_update', 'destroy']:
             return obj.author == request.user or request.user.is_staff
+        else:
+            return True
 
 
 
