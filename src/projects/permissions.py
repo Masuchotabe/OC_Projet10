@@ -28,3 +28,13 @@ class IsProjectContributor(permissions.BasePermission):
         return True
 
 
+class CanEditObject(permissions.BasePermission):
+    """Définit si l'utilisateur peut editer un objet"""
+    def has_object_permission(self, request, view, obj):
+        if not request.user.is_authenticated:
+            return False
+        if view.action in ['update', 'partial_update', 'destroy']:
+            return obj.author == request.user or request.user.is_staff
+
+
+

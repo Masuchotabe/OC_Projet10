@@ -10,14 +10,14 @@ from authentication.models import User
 from authentication.serializers import UserSerializer
 from authentication.permissions import UserPermission
 from projects.models import Project, Issue, Comment
-from projects.permissions import IsProjectContributor
+from projects.permissions import IsProjectContributor, CanEditObject
 from projects.serializers import ProjectListSerializer, ProjectDetailSerializer, IssueListSerializer, \
     IssueDetailSerializer, CommentSerializer
 
 
 class ProjectViewSet(ModelViewSet):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanEditObject]
     filterset_fields = ('type', 'name')
 
     def get_queryset(self):
@@ -57,7 +57,7 @@ class ProjectViewSet(ModelViewSet):
 
 
 class IssueViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated, IsProjectContributor]
+    permission_classes = [IsAuthenticated, IsProjectContributor, CanEditObject]
     filterset_fields = ('tag', 'name', 'priority', 'project')
 
     def perform_create(self, serializer):
@@ -81,7 +81,7 @@ class IssueViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated, IsProjectContributor]
+    permission_classes = [IsAuthenticated, IsProjectContributor, CanEditObject]
 
     def perform_create(self, serializer):
         """Permet d'ajouter le user connecté comme auteur lors de la création"""
